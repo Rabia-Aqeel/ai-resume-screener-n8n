@@ -1,0 +1,605 @@
+{
+  "name": "Ai Resume Screener - GitHub",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Job Application — AI Resume Screener",
+        "formDescription": "Please fill in all fields and upload your resume in PDF format.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "placeholder": "John Doe",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "placeholder": "john@example.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone Number",
+              "placeholder": "+1 234 567 8900",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Job Role",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "AI Automation Intern"
+                  },
+                  {
+                    "option": "Python Developer"
+                  },
+                  {
+                    "option": "Data Analyst"
+                  },
+                  {
+                    "option": "Frontend Developer"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Resume (PDF only)",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "13c75f13-27f0-4c41-87bd-633c71a680ba",
+      "name": "Application Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -2288,
+        144
+      ],
+      "webhookId": "f4efe835-0e06-43d2-b948-031e52bcbb7c"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Validate & normalise form submission ──────────────────────────\nconst item = $input.first();\nconst data = item.json;\n\nconst fullName   = (data['Full Name'] || '').trim();\nconst email      = (data['Email Address'] || '').trim();\nconst phone      = (data['Phone Number'] || '').trim();\nconst jobRole    = (data['Job Role'] || '').trim();\nconst resumeFile = data['Resume (PDF only)'];\n\nconst errors = [];\n\nif (!fullName) errors.push('Full Name is missing.');\nif (!email || !/^[^@]+@[^@]+\\.[^@]+$/.test(email))\n  errors.push('Email is missing or invalid.');\nif (!phone) errors.push('Phone Number is missing.');\nif (!jobRole) errors.push('Job Role is missing.');\n\nif (errors.length) {\n  throw new Error(errors.join(' | '));\n}\n\nconst applicationId =\n  'APP-' + Date.now() + '-' + Math.random().toString(36).substring(2,7).toUpperCase();\n\nreturn [{\n  json: {\n    applicationId,\n    fullName,\n    email,\n    phone,\n    jobRole,\n    resumeFile,\n    submittedAt: new Date().toISOString()\n  },\n  binary: item.binary   \n}];\n"
+      },
+      "id": "337d0bcd-c9f9-4846-8701-8f96c1a428b3",
+      "name": "Validate & Normalise Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2016,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1b0r8HQEdbSOR4w2a6xTNdMWon5ziymkyHzw_pfdKfvU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Job Descriptions"
+        },
+        "options": {}
+      },
+      "id": "a35cbd14-0e12-41b8-89c8-274441f6af6a",
+      "name": "Fetch Job Descriptions Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1760,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "R9nNkatk2AN5UleS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Match the submitted Job Role to its Job Description row ──────\n\nconst validatedData = $('Validate & Normalise Input').first();\nconst data = validatedData.json;\nconst jobRole = data.jobRole;\n\n// Get all rows from Google Sheet\nconst allRows = $input.all();\n\n// Find the matching Job Title\nconst matchedRow = allRows.find(\n  row =>\n    (row.json['Job Title'] || '')\n      .trim()\n      .toLowerCase() === jobRole.trim().toLowerCase()\n);\n\nif (!matchedRow) {\n  throw new Error(`No Job Description found in Google Sheet for role: \"${jobRole}\"`);\n}\n\nconst jd = matchedRow.json;\n\n// Return JSON + Binary\nreturn [\n  {\n    json: {\n      ...data,\n      jobTitle: jd['Job Title'] || jobRole,\n      jobDescription: jd['Job Description'] || '',\n      requiredSkills: jd['Required Skills'] || '',\n      minimumExperience: jd['Minimum Experience'] || '',\n      preferredQualifications: jd['Preferred Qualifications'] || '',\n    },\n    binary: validatedData.binary,\n  },\n];"
+      },
+      "id": "0b2b5a5d-3b51-461c-be19-d05cfccc6093",
+      "name": "Match Job Description",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Extract binary resume data for PDF parsing ───────────────────\nconst item = $input.first();\nconst resumeField = item.json.resumeFile;\n\n// n8n stores uploaded files as binary data referenced by key\n// The form trigger stores file uploads in item.binary\nlet binaryKey = null;\n\nif (item.binary) {\n  const binaryKeys = Object.keys(item.binary);\n  // Find the key that corresponds to the resume\n  binaryKey = binaryKeys.find(k => k.toLowerCase().includes('resume') || k.toLowerCase().includes('pdf')) || binaryKeys[0];\n}\n\nif (!binaryKey && !resumeField) {\n  throw new Error('Resume binary data not found. Ensure the form uploaded the PDF correctly.');\n}\n\nreturn [{\n  json: item.json,\n  binary: item.binary || {}\n}];"
+      },
+      "id": "ca3c8925-26c3-4bec-846c-d7f8099629b1",
+      "name": "Prepare Resume Binary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1248,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "=Resume__PDF_only_",
+        "options": {}
+      },
+      "id": "0e518028-1c59-4c84-9106-3f3c777bc3c6",
+      "name": "Extract PDF Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge extracted resume text with job data\n\nconst extractedItem = $input.first();\nconst accumulatedData = $('Match Job Description').first().json;\n\n// Get extracted resume text\nlet resumeText = extractedItem.json.text || \"\";\n\n// Clean special characters so JSON doesn't break\nresumeText = resumeText\n  .replace(/\\r/g, \" \")\n  .replace(/\\n/g, \"\\\\n\")\n  .replace(/\\t/g, \" \")\n  .replace(/\"/g, '\\\\\"')\n  .trim();\n\n// Count words\nconst words = resumeText.split(/\\s+/);\n\nreturn [\n  {\n    json: {\n      ...accumulatedData,\n      resumeText,\n      resumeWordCount: words.length\n    }\n  }\n];"
+      },
+      "id": "05547908-fd6e-4281-96cd-a426ea132a19",
+      "name": "Merge Resume Text & Job Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-goog-api-key",
+              "value": "YOUR_GEMINI_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are an expert AI Resume Screening Assistant.\\n\\nYour task is to evaluate the candidate by comparing the resume with the job description.\\n\\n========================\\nCANDIDATE INFORMATION\\n========================\\nName: {{ $json.fullName || '' }}\\nApplied Role: {{ $json.jobTitle || '' }}\\nApplication ID: {{ $json.applicationId || '' }}\\n\\n========================\\nJOB INFORMATION\\n========================\\nJob ID: {{ $json.jobId || '' }}\\nJob Title: {{ $json.jobTitle || '' }}\\nJob Description: {{ $json.jobDescription || '' }}\\nRequired Skills: {{ $json.requiredSkills || '' }}\\nMinimum Experience: {{ $json.minimumExperience || '' }}\\nPreferred Qualifications: {{ $json.preferredQualifications || '' }}\\n\\n========================\\nCANDIDATE RESUME\\n========================\\n{{ String($json.resumeText || '') }}\\n\\n========================\\nEVALUATION RULES\\n========================\\nEvaluate the candidate on Technical Skills, Experience, Education, Projects, Certifications, and Overall Fit.\\n\\nScore each category from 0 to 100.\\n\\nOverall Score Formula:\\nTechnical Skills = 30%\\nExperience = 25%\\nEducation = 15%\\nProjects = 15%\\nCertifications = 5%\\nOverall Fit = 10%\\n\\nDecision Rules:\\n- Overall Score >= 70 → Shortlisted\\n- Overall Score 50-69 → Human Review\\n- Overall Score < 50 → Rejected\\n\\n========================\\nINTERVIEW QUESTIONS\\n========================\\nGenerate EXACTLY 5 interview questions.\\nEach question must be different for every candidate.\\nQuestions must be based on the candidate's resume, projects, skills, education, experience, and job description.\\nAvoid generic questions.\\nIf projects exist, ask project-specific questions.\\nIf skills are missing, ask questions to assess those missing skills.\\n\\n========================\\nAI SUMMARY\\n========================\\nWrite EXACTLY 3 short professional sentences.\\nEach sentence should be on a NEW LINE.\\nMention:\\n- strongest skills\\n- biggest weakness\\n- hiring recommendation\\n\\n========================\\nSTRENGTHS\\n========================\\nReturn exactly 3 strengths.\\n\\n========================\\nWEAKNESSES\\n========================\\nReturn exactly 3 weaknesses.\\n\\n========================\\nMISSING SKILLS\\n========================\\nReturn only the important missing skills compared with the job description.\\nIf there are no important missing skills, return an empty array.\\n\\n========================\\nSCORING RATIONALE\\n========================\\nExplain in exactly 2 short sentences why this score and verdict were assigned.\\n\\nReturn ONLY valid JSON using this exact structure:\\n{\\n  \\\"scores\\\": {\\n    \\\"technicalSkills\\\": 0,\\n    \\\"experience\\\": 0,\\n    \\\"education\\\": 0,\\n    \\\"projects\\\": 0,\\n    \\\"certifications\\\": 0,\\n    \\\"overallFit\\\": 0\\n  },\\n  \\\"overallScore\\\": 0,\\n  \\\"verdict\\\": \\\"\\\",\\n  \\\"strengths\\\": [],\\n  \\\"weaknesses\\\": [],\\n  \\\"missingSkills\\\": [],\\n  \\\"aiSummary\\\": \\\"\\\",\\n  \\\"recommendedInterviewQuestions\\\": [],\\n  \\\"scoringRationale\\\": \\\"\\\"\\n}\\n\\nReturn ONLY the JSON object.\\nDo not include markdown, explanations, notes, or code fences.\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.3,\n    \"topP\": 0.9,\n    \"maxOutputTokens\": 2048,\n    \"responseMimeType\": \"application/json\"\n  }\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "190cf491-bd63-451d-9145-fd09ac3f9d0f",
+      "name": "AI Resume Screening (Gemini)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -464,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ── Parse & validate the AI response ─────────────────────────────\nconst aiResponse = $input.first().json;\nconst inputData  = $('Merge Resume Text & Job Data').first().json;\n\nlet rawText = '';\ntry {\n  rawText = aiResponse.candidates[0].content.parts[0].text || '';\n} catch (e) {\n  throw new Error('AI API returned an unexpected response structure: ' + JSON.stringify(aiResponse).substring(0, 300));\n}\n\n// Strip markdown fences if Gemini wraps in them despite our instruction\nlet cleanText = rawText.trim();\nif (cleanText.startsWith('```')) {\n  cleanText = cleanText.replace(/^```[a-z]*\\n?/i, '').replace(/```\\s*$/,'').trim();\n}\n\nlet parsed;\ntry {\n  parsed = JSON.parse(cleanText);\n} catch (e) {\n  throw new Error('Failed to parse AI JSON response. Raw output: ' + cleanText.substring(0, 500));\n}\n\n// --- Validate required fields ---\nconst required = ['scores','overallScore','verdict','strengths','weaknesses','missingSkills','aiSummary','recommendedInterviewQuestions'];\nfor (const field of required) {\n  if (parsed[field] === undefined) {\n    throw new Error(`AI response missing required field: \"${field}\"`);\n  }\n}\n\n// --- Enforce verdict based on score (safety net) ---\nconst score = Number(parsed.overallScore);\nlet verdict = parsed.verdict;\nif (score >= 70)      verdict = 'Shortlisted';\nelse if (score >= 50) verdict = 'Human Review';\nelse                   verdict = 'Rejected';\n\n// --- Verdict emoji for readability ---\nconst verdictEmoji = verdict === 'Shortlisted' ? '✅' : verdict === 'Human Review' ? '🔶' : '❌';\n\nreturn [{\n  json: {\n    ...inputData,\n    scores: parsed.scores,\n    overallScore: score,\n    verdict,\n    verdictEmoji,\n    strengths:    Array.isArray(parsed.strengths)    ? parsed.strengths.join('\\n• ')    : parsed.strengths,\n    weaknesses:   Array.isArray(parsed.weaknesses)   ? parsed.weaknesses.join('\\n• ')   : parsed.weaknesses,\n    missingSkills: Array.isArray(parsed.missingSkills) ? parsed.missingSkills.join(', ') : parsed.missingSkills,\n    aiSummary:    parsed.aiSummary,\n    interviewQuestions: Array.isArray(parsed.recommendedInterviewQuestions)\n      ? parsed.recommendedInterviewQuestions.join('\\n')\n      : parsed.recommendedInterviewQuestions,\n    scoringRationale: parsed.scoringRationale || '',\n    processedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "91808251-fe77-46a7-ba9a-cc91afe679f3",
+      "name": "Parse & Validate AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1b0r8HQEdbSOR4w2a6xTNdMWon5ziymkyHzw_pfdKfvU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "mode": "name",
+          "value": "Screening Results"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Application ID": "={{ $json.applicationId }}",
+            "Email": "={{ $json.email }}",
+            "Overall Score": "={{ $json.overallScore }}",
+            "Verdict": "={{ $json.verdict }}",
+            "Strengths": "={{ $json.strengths }}",
+            "Missing Skills": "={{ $json.missingSkills }}",
+            "Interview Questions": "={{ $json.interviewQuestions }}",
+            "Candidate Name": "={{ $json.fullName }}",
+            "Job Title": "={{ $json.jobTitle }}",
+            "Technical Skills": "={{ $json.requiredSkills }}",
+            "Experience": "={{ $json.minimumExperience }}",
+            "Ai Summary": "={{ $json.aiSummary }}",
+            "Certifications": "={{ $json.scores.certifications }}",
+            "Overall fit": "={{ $json.scores.overallFit }}",
+            "Weakness": "={{ $json.weaknesses }}",
+            "Projects": "={{ $json.scores.projects }}",
+            "Scoring Rationale": "={{ $json.scoringRationale }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Application ID",
+              "displayName": "Application ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Overall Score",
+              "displayName": "Overall Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Verdict",
+              "displayName": "Verdict",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Technical Skills",
+              "displayName": "Technical Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Experience",
+              "displayName": "Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Projects",
+              "displayName": "Projects",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Certifications",
+              "displayName": "Certifications",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Overall fit",
+              "displayName": "Overall fit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ai Summary",
+              "displayName": "Ai Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Missing Skills",
+              "displayName": "Missing Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Strengths",
+              "displayName": "Strengths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Weakness",
+              "displayName": "Weakness",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interview Questions",
+              "displayName": "Interview Questions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Scoring Rationale",
+              "displayName": "Scoring Rationale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ff63ba8e-e6a0-48d9-87ca-ef870b37ccef",
+      "name": "Save Results to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        64,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "R9nNkatk2AN5UleS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "hr@example.com",
+        "subject": "=Ai Resume Screening Report - {{ $json['Candidate Name'] }} | {{ $json['Job Title'] }}",
+        "emailType": "text",
+        "message": "=Dear HR,\n\nA new candidate has been evaluated by the AI Resume Screener.\n\nCandidate: {{ $json['Candidate Name'] }}\nApplied Role: {{ $json['Job Title'] }}\nOverall Score:{{ $json['Overall Score'] }}\nVerdict: {{ $json.Verdict }}\n\nAI Summary:\n{{ $json['Ai Summary'] }}\n\nPlease review the screening result in the Google Sheet for complete details.\n\nRegards,\nAI Resume Screener",
+        "options": {}
+      },
+      "id": "dc94a623-ec49-4a59-abf2-2e32d0581f00",
+      "name": "Email HR Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        0
+      ],
+      "webhookId": "710b9051-6e1f-4d80-9347-c06c0025186a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dnHSf0Hra768MduS",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Application Received —  {{ $json['Job Title'] }}",
+        "emailType": "text",
+        "message": "=Dear {{ $json['Candidate Name'] }},\n\nThank you for applying for the position of {{ $json['Job Title'] }}.\n\nWe have successfully received your application and resume. Our AI Resume Screening System has completed the initial screening, and our recruitment team will review your application.\n\nIf your profile matches our requirements, we will contact you regarding the next steps.\n\nThank you for your interest, and we wish you the very best.\n\nBest Regards,\nHR Team",
+        "options": {}
+      },
+      "id": "49d92737-44fe-4864-a09d-374faadfe04d",
+      "name": "Email Candidate Acknowledgement",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        288
+      ],
+      "webhookId": "e3a8db8d-d195-4f7f-9ccf-5c07018920df",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dnHSf0Hra768MduS",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Application Form": {
+      "main": [
+        [
+          {
+            "node": "Validate & Normalise Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate & Normalise Input": {
+      "main": [
+        [
+          {
+            "node": "Fetch Job Descriptions Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Job Descriptions Sheet": {
+      "main": [
+        [
+          {
+            "node": "Match Job Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Job Description": {
+      "main": [
+        [
+          {
+            "node": "Prepare Resume Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Resume Binary": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Text": {
+      "main": [
+        [
+          {
+            "node": "Merge Resume Text & Job Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Resume Text & Job Data": {
+      "main": [
+        [
+          {
+            "node": "AI Resume Screening (Gemini)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Resume Screening (Gemini)": {
+      "main": [
+        [
+          {
+            "node": "Parse & Validate AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Validate AI Response": {
+      "main": [
+        [
+          {
+            "node": "Save Results to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Results to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Email HR Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email Candidate Acknowledgement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "396ee3f6-5d1f-4ea3-8536-1357b677be6a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b29a0c92c23c22e512ae069718b205d2f0ca7f43f9c5692a5fdc83d3199dfbcc"
+  },
+  "nodeGroups": [],
+  "id": "zeQYDeZumG4rPnP2",
+  "tags": []
+}
