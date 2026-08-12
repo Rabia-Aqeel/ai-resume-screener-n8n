@@ -40,6 +40,10 @@ This project automates the initial resume screening process. It collects candida
 8. HR receives an automated report.
 9. Candidate receives an acknowledgement email.
 
+### Workflow Overview
+
+![AI Resume Screener Workflow](./workflow-overview.png)
+
 ## 📌 Project Purpose
 
 The goal of this project is to reduce manual resume screening work and create a structured, automated workflow for initial candidate evaluation.
