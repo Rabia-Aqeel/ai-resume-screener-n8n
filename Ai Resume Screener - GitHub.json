@@ -82,7 +82,7 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1b0r8HQEdbSOR4w2a6xTNdMWon5ziymkyHzw_pfdKfvU",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "id"
         },
         "sheetName": {
@@ -207,7 +207,7 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1b0r8HQEdbSOR4w2a6xTNdMWon5ziymkyHzw_pfdKfvU",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "id"
         },
         "sheetName": {
