@@ -42,7 +42,7 @@ This project automates the initial resume screening process. It collects candida
 
 ### Workflow Overview
 
-![AI Resume Screener Workflow](./workflow-overview.png)
+![AI Resume Screener Workflow](./Workflow-overview.png)
 
 ## 📌 Project Purpose
 
