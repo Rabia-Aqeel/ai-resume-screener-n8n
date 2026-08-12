@@ -1,3 +1,4 @@
+![AI Resume Screener Banner](./Banner.jpeg)
 # AI Resume Screener
 
 An AI-powered resume screening workflow built with **n8n** and **Google Gemini**.
