@@ -145,7 +145,7 @@ The system:
 
 This helps prevent malformed AI responses from directly entering the final candidate database.
 
-1️⃣1️⃣ 💡 Why This Project?
+💡 Why This Project?
 
 This project demonstrates how AI can be combined with workflow automation to solve a real-world business problem.
 
@@ -155,12 +155,12 @@ AI + Automation + APIs + Data Processing + Decision Logic + Business Workflow
 
 The result is an end-to-end automated screening pipeline that can be adapted to different job roles and recruitment requirements.
 
-1️⃣2️⃣ 📸 Workflow Preview
+📸 Workflow Preview
 
 ![AI Resume Screener Workflow](./Workflow-overview.png)
 
 
-1️⃣3️⃣ 🎓 Skills Demonstrated
+🎓 Skills Demonstrated
 
 This project demonstrates practical experience with:
 
@@ -180,7 +180,7 @@ This project demonstrates practical experience with:
 * End-to-End Workflow Design
 
 
-1️⃣4️⃣📌 Conclusion
+📌 Conclusion
 
 AI Resume Screener demonstrates how AI and automation can transform a repetitive recruitment task into a structured, scalable workflow.
 
