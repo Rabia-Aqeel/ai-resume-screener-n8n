@@ -20,7 +20,7 @@ The system processes a submitted resume, extracts the resume content, compares i
 
 The screening results are stored in the accompanying Excel file:
 
-Screening-results.xlsx
+
 
 ---
 
