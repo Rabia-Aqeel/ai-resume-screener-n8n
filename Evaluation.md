@@ -6,7 +6,6 @@ The AI Resume Screener was tested using real screening workflow runs to evaluate
 
 The system processes a submitted resume, extracts the resume content, compares it with the relevant job description using AI, generates a match score and screening analysis, stores the result in Google Sheets, and triggers an automated email based on the final decision.
 
----
 
 ## Test Dataset
 
@@ -22,7 +21,6 @@ The screening results are stored in the accompanying Excel file:
 
 [View Screening Results](./Screening-results.xlsx)
 
----
 
 ## Testing Workflow
 
@@ -48,7 +46,6 @@ Each test followed the same automated pipeline:
 8. The decision logic determines the next action.
 9. An automated email notification is sent based on the screening outcome.
 
----
 
 ## Screening Results
 
@@ -74,7 +71,6 @@ Cases requiring additional human assessment were marked as:
 
 This provides a safer alternative to forcing every candidate into an automatic accept/reject decision.
 
----
 
 ## Results Summary
 
@@ -86,7 +82,6 @@ The 29 test runs produced the following results:
 
 The complete screening results are available in the accompanying Excel dataset.
 
----
 
 ## What Was Evaluated
 
@@ -103,7 +98,6 @@ The testing focused on whether the automation could successfully:
 - Store structured results in Google Sheets
 - Trigger automated email notifications
 
----
 
 ## Evaluation Metrics
 
@@ -113,7 +107,6 @@ The current evaluation therefore focuses on **workflow execution and screening-o
 
 If human-verified labels are established for the test dataset in the future, standard classification metrics can be calculated.
 
----
 
 ## Data Privacy
 
@@ -123,7 +116,6 @@ Personally identifiable information such as names, email addresses, phone number
 
 The published evaluation data is intended only to demonstrate the functionality and testing of the AI Resume Screener.
 
----
 
 ## Limitations
 
@@ -139,7 +131,6 @@ Potential sources of variation include:
 
 For this reason, the workflow includes a **Human Review** outcome for cases that may require additional assessment.
 
----
 
 ## Conclusion
 
