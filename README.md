@@ -1,185 +1,104 @@
 ![AI Resume Screener Banner](./Banner.jpeg)
 AI Resume Screener
 
-An AI-powered recruitment automation workflow that automatically analyzes candidate resumes against job-specific requirements, generates a structured evaluation, and helps recruiters make faster initial screening decisions.
+An AI-powered recruitment automation workflow that automates the initial resume screening process by comparing candidate resumes with job-specific requirements and generating a structured AI evaluation.
+Built with n8n, Google Gemini, Google Sheets, Google Drive, ConvertAPI, and Gmail.
 
-Built with: n8n, Google Gemini, Google Sheets, Google Drive, ConvertAPI, and Gmail.
+Overview:
 
-Overview
+AI Resume Screener streamlines the initial stage of candidate screening.
 
-AI Resume Screener automates the initial stage of the recruitment process.
+Candidates submit their information, resume, and desired job role through an n8n form. The workflow extracts the resume text, retrieves the relevant job requirements, and uses Google Gemini to evaluate the candidate against the selected position.
 
-Instead of manually reviewing every resume, recruiters can collect candidate information through an n8n form and let the workflow automatically process the resume, compare it with the selected job requirements, generate an AI-based evaluation, and store the final screening result.
+The system generates a match score, identifies relevant skills and experience, provides strengths and weaknesses, and produces a shortlist or reject decision. The results are then stored in Google Sheets and an automated email is sent to the candidate.
 
-Workflow
+Key Features:
 
-┌──────────────────────┐
-│      Candidate       │
-│  Resume + Job Role   │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│      n8n Form        │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│     Google Drive     │
-│    Resume Storage    │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│      ConvertAPI      │
-│    PDF → Text        │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐       ┌──────────────────────┐
-│  Resume Information  │◄──────│  Job Requirements    │
-└──────────┬───────────┘       │   Google Sheets      │
-           │                   └──────────────────────┘
-           ▼
-┌──────────────────────┐
-│    Google Gemini     │
-│   AI Evaluation      │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│ Structured Evaluation│
-│ Match Score + Reason │
-└──────────┬───────────┘
-           │
-           ▼
-      ┌────┴────┐
-      │ Decision│
-      └────┬────┘
-           │
-     ┌─────┴─────┐
-     ▼           ▼
-┌──────────┐ ┌──────────┐
-│ Shortlist│ │  Reject  │
-└────┬─────┘ └────┬─────┘
-     │            │
-     └──────┬─────┘
-            ▼
-┌──────────────────────┐
-│     Google Sheets    │
-│   Screening Results  │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│        Gmail         │
-│ Automated Email      │
-└──────────────────────┘
-
-
-Key Features
-
-* Automated candidate and resume collection through an n8n form
-* PDF resume text extraction
+* Automated resume collection through n8n
+* PDF resume text extraction using ConvertAPI
 * Job-specific resume evaluation
-* AI-powered candidate analysis using Google Gemini
-* Candidate match score from 0 to 100
-* Relevant skills and experience analysis
+* AI-powered analysis using Google Gemini
+* Candidate match score from 0–100
+* Skills and experience analysis
 * Strengths and weaknesses identification
-* Automated shortlist or reject decision
-* Screening results stored in Google Sheets
+* Automated shortlist/reject decision
+* Results stored in Google Sheets
 * Automated candidate email notifications
 * Support for multiple job roles
 
+Workflow:
 
-AI Evaluation
+Candidate Submission
+        ↓
+    n8n Form
+        ↓
+    Resume PDF
+        ↓
+  PDF → Text
+   ConvertAPI
+        ↓
+Job Requirements
+ Google Sheets
+        ↓
+ Google Gemini
+  AI Evaluation
+        ↓
+Match Score + Analysis
+        ↓
+Shortlist / Reject
+      ↙     ↘
+Google Sheets  Gmail
 
-For each candidate, the system generates a structured evaluation containing:
+AI Evaluation:
+
+The system generates a structured evaluation containing:
 
 Field	Description
-Candidate Name	Candidate name identified from the resume
+Candidate Name	Candidate name
 Job Title	Selected position
-Match Score	Overall resume-to-job match from 0 to 100
-Skills Found	Relevant skills identified in the resume
-Experience Summary	Summary of relevant experience
-Strengths	Areas where the candidate matches well
+Match Score	Resume-to-job match score
+Skills Found	Relevant skills identified
+Experience Summary	Relevant experience
+Strengths	Strong matching areas
 Weaknesses	Missing or weaker requirements
 Decision	Shortlist or Reject
-Reason	Explanation supporting the decision
+Reason	Explanation for the decision
 
-
-Tech Stack
+Tech Stack:
 
 Technology	Purpose
-n8n	Workflow automation and orchestration
-Google Gemini	AI-powered resume evaluation
-Google Sheets	Job requirements and screening results
-Google Drive	Resume file management
+n8n	Workflow automation
+Google Gemini	AI resume evaluation
+Google Sheets	Job requirements and results
+Google Drive	Resume handling
 ConvertAPI	PDF-to-text conversion
-Gmail	Automated candidate communication
-JavaScript	Data processing and workflow logic
-JSON	Structured data exchange
+Gmail	Automated communication
+JavaScript / JSON	Data processing
 
-Workflow Components
+Supported Job Roles:
 
-The workflow consists of the following major stages:
-
-1. Candidate submits their information and resume.
-2. The selected job role is identified.
-3. Job requirements are retrieved from Google Sheets.
-4. The uploaded PDF is processed and converted into text.
-5. Resume content and job requirements are provided to Google Gemini.
-6. The AI generates a structured candidate evaluation.
-7. The candidate receives a match score and screening decision.
-8. The result is stored in Google Sheets.
-9. An automated email is sent based on the decision.
-
-
-Supported Job Roles
-
-The workflow can be configured for different positions, including:
+The workflow can be configured for multiple positions, such as:
 
 * AI Automation Intern
 * Python Developer
 * Data Analyst
 * Frontend Developer
 
-Additional positions can be added by updating the job requirements in Google Sheets.
+New roles can be added by updating the job requirements in Google Sheets.
 
+n8n Workflow:
 
-Project Screenshots
+![AI Resume Screener Workflow](./Workflow-overview.png)
 
-n8n Workflow
-
-Add your n8n workflow screenshot here.
-
-Screening Results
-
-Add your Google Sheets screening results screenshot here.
-
-⸻
-
-Setup
+Setup:
 
 1. Import the workflow JSON into n8n.
-2. Configure the required Google, Gemini, ConvertAPI, and Gmail credentials.
-3. Create the required Google Sheets structure.
-4. Add job descriptions and requirements to the Job Descriptions sheet.
-5. Configure Google Drive for resume handling.
-6. Activate the workflow.
-7. Submit a test resume through the form.
+2. Configure the required credentials and API integrations.
+3. Add job descriptions and requirements to Google Sheets.
+4. Configure Google Drive and Gmail.
+5. Activate the workflow and submit a test resume.
 
-⸻
-
-Security and Privacy
-
-This project is designed for initial candidate screening and should not replace final human hiring decisions.
-
-For production deployment, appropriate measures should be implemented for protecting candidate information, managing API credentials, controlling access, and defining data-retention policies.
-
-⸻
-
-Future Improvements
+Future Improvements:
 
 * Recruiter dashboard
 * Batch resume processing
@@ -187,45 +106,17 @@ Future Improvements
 * Screening analytics
 * Human-in-the-loop approval
 * Interview scheduling automation
-* Candidate database integration
 
-⸻
+Skills Demonstrated:
 
-Skills Demonstrated
+AI Automation · n8n · Prompt Engineering · Google Gemini · REST APIs · JSON · JavaScript · Google Sheets Automation · Google Drive Integration · PDF Processing · Conditional Logic · Automated Email Workflows
 
-AI Automation, n8n Workflow Automation, Prompt Engineering, Google Gemini, REST APIs, JSON, JavaScript, Google Sheets Automation, Google Drive Integration, PDF Processing, Conditional Logic, and Automated Email Workflows.
+Project Summary:
 
-⸻
-
-Project Summary
-
-AI Resume Screener is an end-to-end recruitment automation workflow that transforms a candidate’s resume into a structured AI evaluation and automated screening decision.
-
-Resume
-   │
-   ▼
-Text Extraction
-   │
-   ▼
-Job Requirement Matching
-   │
-   ▼
-AI Evaluation
-   │
-   ▼
-Match Score
-   │
-   ▼
-Screening Decision
-   │
-   ▼
-Automated Communication
-   │
-   ▼
-Result Storage
+AI Resume Screener is an end-to-end recruitment automation solution that transforms a candidate’s resume into a structured AI evaluation and automated screening decision.
 
 
-![AI Resume Screener Workflow](./Workflow-overview.png)
+
 
 
 
