@@ -99,15 +99,6 @@ The testing focused on whether the automation could successfully:
 - Trigger automated email notifications
 
 
-## Evaluation Metrics
-
-Accuracy, Precision, Recall, and F1-score are not reported in this evaluation because these metrics require independently verified ground-truth labels for each candidate.
-
-The current evaluation therefore focuses on **workflow execution and screening-output validation** rather than claiming model classification accuracy.
-
-If human-verified labels are established for the test dataset in the future, standard classification metrics can be calculated.
-
-
 ## Data Privacy
 
 Candidate information used for the public GitHub version is anonymized.
