@@ -82,60 +82,7 @@ Factor	Description
 This makes the output more useful than a simple AI-generated resume summary.
 
 
-4️⃣ 🏗️ Architecture
-
-Candidate
-    │
-    ▼
-n8n Form
-    │
-    ├── Candidate Information
-    ├── Resume PDF
-    └── Selected Job Role
-            │
-            ▼
-     Google Sheets
-     Job Descriptions
-            │
-            ▼
-       Resume PDF
-            │
-            ▼
-        ConvertAPI
-            │
-            ▼
-       Resume Text
-            │
-            ▼
-    Resume + Job Data
-            │
-            ▼
-      Google Gemini
-       AI Evaluation
-            │
-            ▼
-   Structured Output Parser
-            │
-            ▼
-        Code Node
-      Validation/Parsing
-            │
-            ▼
-        IF Decision
-       ┌────┴────┐
-       ▼         ▼
-   Shortlist   Reject
-       │         │
-       └────┬────┘
-            ▼
-      Google Sheets
-       Save Results
-            │
-            ▼
-      Gmail Notification
-
-
-5️⃣ 🧩 Tech Stack
+4️⃣ 🧩 Tech Stack
 
 Technology	Purpose
 n8n	Workflow automation & orchestration
@@ -148,7 +95,7 @@ JavaScript	Data parsing and validation
 JSON	Structured AI output
 
 
-6️⃣ ✨ Key Features
+5️⃣ ✨ Key Features
 
 * 🤖 AI-powered resume screening
 * 📄 Automated PDF resume processing
@@ -163,36 +110,7 @@ JSON	Structured AI output
 * 📧 Automated email notifications
 * 🔄 Fully automated n8n workflow
 
-
-7️⃣ 📋 Example AI Output
-
-{
-  "candidateName": "Candidate Name",
-  "jobTitle": "AI Automation Intern",
-  "matchScore": 86,
-  "skillsFound": [
-    "n8n",
-    "Python",
-    "REST APIs",
-    "Google Sheets",
-    "AI Automation"
-  ],
-  "experienceSummary": "Relevant academic and project experience in AI automation and workflow development.",
-  "strengths": [
-    "Strong automation experience",
-    "Relevant technical skills",
-    "Good alignment with job requirements"
-  ],
-  "weaknesses": [
-    "Limited professional experience"
-  ],
-  "decision": "Shortlist",
-  "reason": "The candidate demonstrates strong alignment with the required skills and qualifications."
-}
-
-⸻
-
-8️⃣ 📊 Result Management
+6️⃣ 📊 Result Management
 
 All evaluated candidates are stored in Google Sheets, allowing recruiters to maintain a centralized screening record.
 
@@ -212,9 +130,7 @@ The result sheet can contain information such as:
 
 This creates a simple searchable candidate evaluation database without requiring a separate recruitment platform.
 
-⸻
-
-9️⃣ 🔐 Reliability & Validation
+7️⃣🔐 Reliability & Validation
 
 The workflow includes processing and validation steps to make the AI-generated output more reliable.
 
@@ -229,25 +145,6 @@ The system:
 
 This helps prevent malformed AI responses from directly entering the final candidate database.
 
-⸻
-
-🔟 🚀 Future Improvements
-
-Possible extensions for a production-grade version include:
-
-* 📈 Recruiter analytics dashboard
-* 🧮 Automated screening performance metrics
-* 🔍 Semantic skill matching
-* 🗂️ Candidate database with search and filters
-* 📧 Personalized recruiter summaries
-* 🧠 Multi-model evaluation
-* ⚖️ Bias and fairness monitoring
-* 🔐 Secure candidate data handling
-* 📊 Recruitment funnel analytics
-* 👥 Human-in-the-loop recruiter approval
-
-⸻
-
 1️⃣1️⃣ 💡 Why This Project?
 
 This project demonstrates how AI can be combined with workflow automation to solve a real-world business problem.
@@ -258,35 +155,12 @@ AI + Automation + APIs + Data Processing + Decision Logic + Business Workflow
 
 The result is an end-to-end automated screening pipeline that can be adapted to different job roles and recruitment requirements.
 
-⸻
-
 1️⃣2️⃣ 📸 Workflow Preview
 
-Add your n8n workflow screenshot here.
+![AI Resume Screener Workflow](./Workflow-overview.png)
 
-[ Add Workflow Screenshot ]
 
-⸻
-
-1️⃣3️⃣ 🗂️ Project Structure
-
-AI-Resume-Screener/
-│
-├── README.md
-├── workflow/
-│   └── AI Resume Screener.json
-│
-├── screenshots/
-│   ├── workflow.png
-│   ├── candidate-form.png
-│   └── evaluation-results.png
-│
-└── examples/
-    └── sample-output.json
-
-⸻
-
-1️⃣4️⃣ 🎓 Skills Demonstrated
+1️⃣3️⃣ 🎓 Skills Demonstrated
 
 This project demonstrates practical experience with:
 
@@ -305,16 +179,15 @@ This project demonstrates practical experience with:
 * Structured AI Output
 * End-to-End Workflow Design
 
-⸻
 
-1️⃣5️⃣ 📌 Conclusion
+1️⃣4️⃣📌 Conclusion
 
 AI Resume Screener demonstrates how AI and automation can transform a repetitive recruitment task into a structured, scalable workflow.
 
 The project combines n8n orchestration, AI-powered evaluation, document processing, structured outputs, business logic, data storage, and automated communication into a single end-to-end system.
 
 Built with n8n + Google Gemini + APIs + Automation 🚀
-![AI Resume Screener Workflow](./Workflow-overview.png)
+
 
 
 
